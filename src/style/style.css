@@ -22,3 +22,13 @@ body {
   max-width: 100%;
   margin: 0 auto;
 }
+
+#characterselection {
+  position: absolute;
+  background-color: white;
+}
+
+#characterselection ul {
+  list-style: none;
+  padding-left: 0;
+}

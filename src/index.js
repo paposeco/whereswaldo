@@ -48,38 +48,90 @@ const clickedWhichCharac = function (coordx, coordy) {
     coordy >= waldoLocationMinHeight &&
     coordy <= waldoLocationMaxHeight
   ) {
-    alert("You found Waldo!");
+    //  alert("You found Waldo!");
+    return "waldo";
   } else if (
     coordx >= odlawLocationMinWidth &&
     coordx <= odlawLocationMaxWidth &&
     coordy >= odlawLocationMinHeight &&
     coordy <= odlawLocationMaxHeight
   ) {
-    alert("You found Odlaw!");
+    //    alert("You found Odlaw!");
+    return "odlaw";
   } else if (
     coordx >= wendaLocationMinWidth &&
     coordx <= wendaLocationMaxWidth &&
     coordy >= wendaLocationMinHeight &&
     coordy <= wendaLocationMaxHeight
   ) {
-    alert("You found Wenda!");
+    //  alert("You found Wenda!");
+    return "wenda";
   } else if (
     coordx >= wizardLocationMinWidth &&
     coordx <= wizardLocationMaxWidth &&
     coordy >= wizardLocationMinHeight &&
     coordy <= wizardLocationMaxHeight
   ) {
-    alert("You found Wizard Whitebeard!");
+    //   alert("You found Wizard Whitebeard!");
+    return "wizard";
   } else if (
     coordx >= woofLocationMinWidth &&
     coordx <= woofLocationMaxWidth &&
     coordy >= woofLocationMinHeight &&
     coordy <= woofLocationMaxHeight
   ) {
-    alert("You found Woof!");
+    // alert("You found Woof!");
+    return "woof";
   }
 };
 
 img.addEventListener("click", (event) => {
-  clickedWhichCharac(event.offsetX, event.offsetY);
+  const character = clickedWhichCharac(event.offsetX, event.offsetY);
+  createDropDown(event);
 });
+
+const createDropDown = function (event) {
+  if (document.getElementById("characterselection") !== null) {
+    document.getElementById("characterselection").remove();
+  }
+  const div = document.createElement("div");
+  div.setAttribute("id", "characterselection");
+  const marginleft =
+    (Number(document.documentElement.clientWidth) - Number(img.clientWidth)) /
+    2;
+  div.style.top = event.offsetY - 50 + "px";
+  div.style.left = event.offsetX + marginleft + 20 + "px";
+  const ul = document.createElement("ul");
+  const liwaldo = document.createElement("li");
+  liwaldo.textContent = "Waldo";
+  const liodlaw = document.createElement("li");
+  liodlaw.textContent = "Odlaw";
+  const liwenda = document.createElement("li");
+  liwenda.textContent = "Wenda";
+  const liwhitebeard = document.createElement("li");
+  liwhitebeard.textContent = "Wizard Whitebeard";
+  const liwoof = document.createElement("li");
+  liwoof.textContent = "Woof";
+
+  ul.appendChild(liwaldo);
+  ul.appendChild(liodlaw);
+  ul.appendChild(liwenda);
+  ul.appendChild(liwhitebeard);
+  ul.appendChild(liwoof);
+  let selectedCharacter;
+  const characters = [liwaldo, liodlaw, liwenda, liwhitebeard, liwoof];
+  for (let i = 0; i < characters.length; i++) {
+    characters[i].addEventListener(
+      "click",
+      () => {
+        selectedCharacter = characters[i].textContent;
+        div.remove();
+      }
+      //
+      // save selected character on list somewhere
+    );
+  }
+
+  background.appendChild(div);
+  div.appendChild(ul);
+};
