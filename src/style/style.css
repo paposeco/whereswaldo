@@ -32,3 +32,37 @@ body {
   list-style: none;
   padding-left: 0;
 }
+
+#characterToLookFor {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.characterthumbnail {
+  width: 100px;
+}
+
+#loading {
+  width: 98vw;
+  height: 98vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: grey;
+}
+
+#spinner {
+  animation-name: rotate;
+  animation-duration: 8s;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

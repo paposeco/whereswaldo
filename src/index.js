@@ -1,6 +1,10 @@
 import "./style/style.css";
 import BackgroundImage from "./images/waldo.jpeg";
-import { createDropDown, drawCircleAroundCharacter } from "./dom.js";
+import {
+  createDropDown,
+  drawCircleAroundCharacter,
+  addImagesToStartPage,
+} from "./dom.js";
 import { getFirebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
@@ -27,7 +31,21 @@ const displayImage = function () {
   });
 };
 
-window.onload = displayImage;
+//window.onload = displayImage;
+//loading screen
+
+// const checkIfUserIsLoggedIn = function () {
+//   const signedin = getAuth().currentUser;
+//   if (signedin === null) {
+//     addImagesToStartPage();
+//   } else {
+//     const gamestartdiv = document.getElementById("gamestart");
+//     const backgrounddiv = document.getElementById("background");
+//     gamestartdiv.hidden = true;
+//     backgrounddiv.hidden = false;
+//   }
+// };
+// window.onload = checkIfUserIsLoggedIn;
 
 const calculateLocations = function (character) {
   const img = document.getElementById("backgroundimage");
@@ -164,9 +182,21 @@ const initFirebaseAuth = function () {
 
 const authStateObserver = function (user) {
   if (user) {
+    const loadingdiv = document.getElementById("loading");
+    loadingdiv.style.display = "none";
+    const gamestartdiv = document.getElementById("gamestart");
+    const backgrounddiv = document.getElementById("background");
+    gamestartdiv.hidden = true;
+    backgrounddiv.hidden = false;
+    displayImage();
     initUser(user.uid);
   } else {
-    console.log("nothing");
+    const loadingdiv = document.getElementById("loading");
+    loadingdiv.style.display = "none";
+    const gamestartdiv = document.getElementById("gamestart");
+    loadingdiv.hidden = true;
+    gamestartdiv.hidden = false;
+    addImagesToStartPage();
   }
 };
 
@@ -198,6 +228,9 @@ const getLocationFromDB = async function (character) {
 };
 
 const reCalculateLocationsOnResize = async function () {
+  if (getAuth().currentUser === null) {
+    return;
+  }
   const currentuser = getAuth().currentUser.uid;
   const docRef = doc(getFirestore(), "users", currentuser);
   try {
@@ -220,6 +253,7 @@ const firebaseAppConfig = getFirebaseConfig();
 initializeApp(firebaseAppConfig);
 initFirebaseAuth();
 
+//window.onload = onPageLoad();
 window.onresize = reCalculateLocationsOnResize;
 
 export default checkIfSelectedCharacterIsCorrect;
@@ -229,68 +263,3 @@ export default checkIfSelectedCharacterIsCorrect;
 //scoreboard
 //mark found elements
 //high score board. prompt user for name if he's on top 5
-
-// first implementation
-// const clickedWhichCharac = function (coordx, coordy) {
-//   let waldoLocationMinWidth = Math.ceil(0.3963 * Number(img.clientWidth));
-//   let waldoLocationMaxWidth = Math.ceil(0.4123 * Number(img.clientWidth));
-//   let waldoLocationMinHeight = Math.ceil(0.5879 * Number(img.clientHeight));
-//   let waldoLocationMaxHeight = Math.ceil(0.6352 * Number(img.clientHeight));
-
-//   let odlawLocationMinWidth = Math.ceil(0.062 * Number(img.clientWidth));
-//   let odlawLocationMaxWidth = Math.ceil(0.077 * Number(img.clientWidth));
-//   let odlawLocationMinHeight = Math.ceil(0.6616 * Number(img.clientHeight));
-//   let odlawLocationMaxHeight = Math.ceil(0.6928 * Number(img.clientHeight));
-
-//   let wendaLocationMinWidth = Math.ceil(0.2888 * Number(img.clientWidth));
-//   let wendaLocationMaxWidth = Math.ceil(0.3006 * Number(img.clientWidth));
-//   let wendaLocationMinHeight = Math.ceil(0.4764 * Number(img.clientHeight));
-//   let wendaLocationMaxHeight = Math.ceil(0.5359 * Number(img.clientHeight));
-
-//   let wizardLocationMinWidth = Math.ceil(0.7743 * Number(img.clientWidth));
-//   let wizardLocationMaxWidth = Math.ceil(0.7897 * Number(img.clientWidth));
-//   let wizardLocationMinHeight = Math.ceil(0.5369 * Number(img.clientHeight));
-//   let wizardLocationMaxHeight = Math.ceil(0.5898 * Number(img.clientHeight));
-
-//   let woofLocationMinWidth = Math.ceil(0.5823 * Number(img.clientWidth));
-//   let woofLocationMaxWidth = Math.ceil(0.5936 * Number(img.clientWidth));
-//   let woofLocationMinHeight = Math.ceil(0.9007 * Number(img.clientHeight));
-//   let woofLocationMaxHeight = Math.ceil(0.9105 * Number(img.clientHeight));
-
-//   if (
-//     coordx >= waldoLocationMinWidth &&
-//     coordx <= waldoLocationMaxWidth &&
-//     coordy >= waldoLocationMinHeight &&
-//     coordy <= waldoLocationMaxHeight
-//   ) {
-//     return "waldo";
-//   } else if (
-//     coordx >= odlawLocationMinWidth &&
-//     coordx <= odlawLocationMaxWidth &&
-//     coordy >= odlawLocationMinHeight &&
-//     coordy <= odlawLocationMaxHeight
-//   ) {
-//     return "odlaw";
-//   } else if (
-//     coordx >= wendaLocationMinWidth &&
-//     coordx <= wendaLocationMaxWidth &&
-//     coordy >= wendaLocationMinHeight &&
-//     coordy <= wendaLocationMaxHeight
-//   ) {
-//     return "wenda";
-//   } else if (
-//     coordx >= wizardLocationMinWidth &&
-//     coordx <= wizardLocationMaxWidth &&
-//     coordy >= wizardLocationMinHeight &&
-//     coordy <= wizardLocationMaxHeight
-//   ) {
-//     return "wizard";
-//   } else if (
-//     coordx >= woofLocationMinWidth &&
-//     coordx <= woofLocationMaxWidth &&
-//     coordy >= woofLocationMinHeight &&
-//     coordy <= woofLocationMaxHeight
-//   ) {
-//     return "woof";
-//   }
-// };
