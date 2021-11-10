@@ -63,6 +63,7 @@ const createDropDown = function (event) {
   ul.appendChild(liwoof);
   let selectedCharacter;
   const clickLocation = [event.offsetX, event.offsetY];
+  console.log(event.offsetX, event.offsetY);
   const characters = [liwaldo, liodlaw, liwenda, liwhitebeard, liwoof];
   for (let i = 0; i < characters.length; i++) {
     characters[i].addEventListener("click", (anotherevent) => {

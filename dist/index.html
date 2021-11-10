@@ -27,7 +27,7 @@
         <p>Loading</p>
         <i class="las la-spinner" style="font-size: 35px" id="spinner"></i>
       </div>
-      <div id="gamestart" hidden>
+      <div id="gamestart" style="display: none">
         <div id="gameinfo">
           <h2>Ready to find Waldo, his friends and nemesis?</h2>
           <div id="charactersToLookFor"></div>
@@ -39,7 +39,10 @@
         </div>
         <button id="login">Start</button>
       </div>
-      <div id="background" hidden></div>
+      <div id="game" style="display: none">
+        <div id="gamestatus"></div>
+        <div id="background"></div>
+      </div>
     </div>
     <script src="main.js"></script>
   </body>

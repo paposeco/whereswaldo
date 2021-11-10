@@ -31,24 +31,8 @@ const displayImage = function () {
   });
 };
 
-//window.onload = displayImage;
-//loading screen
-
-// const checkIfUserIsLoggedIn = function () {
-//   const signedin = getAuth().currentUser;
-//   if (signedin === null) {
-//     addImagesToStartPage();
-//   } else {
-//     const gamestartdiv = document.getElementById("gamestart");
-//     const backgrounddiv = document.getElementById("background");
-//     gamestartdiv.hidden = true;
-//     backgrounddiv.hidden = false;
-//   }
-// };
-// window.onload = checkIfUserIsLoggedIn;
-
 const calculateLocations = function (character) {
-  const img = document.getElementById("backgroundimage");
+  let img = document.getElementById("backgroundimage");
   switch (character) {
     case "waldo":
       const waldoLocationMinWidth = Math.ceil(0.3963 * Number(img.clientWidth));
@@ -185,17 +169,20 @@ const authStateObserver = function (user) {
     const loadingdiv = document.getElementById("loading");
     loadingdiv.style.display = "none";
     const gamestartdiv = document.getElementById("gamestart");
-    const backgrounddiv = document.getElementById("background");
-    gamestartdiv.hidden = true;
-    backgrounddiv.hidden = false;
+    const gamediv = document.getElementById("game");
+    gamediv.classList.add("showgame");
+    gamediv.style.display = "flex";
+    gamestartdiv.style.display = "none";
     displayImage();
-    initUser(user.uid);
+    //ugly but necessary. by the time inituser was called the image wasn't loaded yet tried to await it but it didn't work
+    setTimeout(() => {
+      initUser(user.uid);
+    }, 1000);
   } else {
     const loadingdiv = document.getElementById("loading");
     loadingdiv.style.display = "none";
     const gamestartdiv = document.getElementById("gamestart");
-    loadingdiv.hidden = true;
-    gamestartdiv.hidden = false;
+    gamestartdiv.style.display = "flex";
     addImagesToStartPage();
   }
 };
