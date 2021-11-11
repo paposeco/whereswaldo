@@ -87,8 +87,52 @@ body {
 }
 
 #gamestatus {
-  /* position: absolute; */
-  /* top: 0; */
-  /* height: 100vh; */
-  width: 200px;
+  display: block;
+  width: 250px;
+  margin: 0 auto;
+}
+
+#sidethumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.characterthumbnailgame {
+  width: 75px;
+}
+
+.divcharacterthumbnail {
+  text-align: center;
+  border: 1px dotted grey;
+  width: 175px;
+}
+
+.divcharacterthumbnail img {
+  display: block;
+  margin: 0 auto;
+}
+
+.divcharacterthumbnail h4 {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.found {
+  opacity: 0.5;
+}
+
+.found h4:after {
+  content: "\002714";
+}
+
+#foundoverlay {
+  position: absolute;
+  width: 250px;
+  height: 100px;
+  background: white;
+  top: 50%;
+  left: 50%;
 }

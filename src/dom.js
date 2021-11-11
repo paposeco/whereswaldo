@@ -27,6 +27,38 @@ const addImagesToStartPage = function () {
   }
 };
 
+const addImagesToGame = function () {
+  const sidethumbnailsdiv = document.getElementById("sidethumbnails");
+  const sidetitle = document.createElement("h3");
+  sidetitle.textContent = "Characters";
+  sidethumbnailsdiv.appendChild(sidetitle);
+  const allCharacters = [
+    { alias: "waldothumbnail", file: waldoThumbnail, name: "Waldo" },
+    { alias: "odlawthumbnail", file: odlawThumbnail, name: "Odlaw" },
+    { alias: "wendathumbnail", file: wendaThumbnail, name: "Wenda" },
+    {
+      alias: "wizardthumbnail",
+      file: wizardThumbnail,
+      name: "Wizard Whitebeard",
+    },
+    { alias: "woofthumbnail", file: woofThumbnail, name: "Woof" },
+  ];
+  for (let i = 0; i < allCharacters.length; i++) {
+    const div = document.createElement("div");
+    div.setAttribute("class", "divcharacterthumbnail");
+    div.setAttribute("id", allCharacters[i].alias);
+    const img = document.createElement("img");
+    const charactername = document.createElement("h4");
+    charactername.textContent = allCharacters[i].name;
+    img.src = allCharacters[i].file;
+    img.alt = allCharacters[i].alias;
+    img.setAttribute("class", "characterthumbnailgame");
+    div.appendChild(charactername);
+    div.appendChild(img);
+    sidethumbnailsdiv.appendChild(div);
+  }
+};
+
 const createDropDown = function (event) {
   const img = document.getElementById("backgroundimage");
   if (document.getElementById("characterselection") !== null) {
@@ -83,26 +115,73 @@ const drawCircleAroundCharacter = function (coordx, coordy, character) {
   const backgroundiv = document.getElementById("background");
   const imgwidth = Number(img.clientWidth);
   const backgrounddivwidth = Number(backgroundiv.clientWidth);
+  const gamestatusdiv = document.getElementById("gamestatus");
   let leftmargin = 0;
   if (backgrounddivwidth > imgwidth) {
-    //only works if backgroundimage is centered
-    leftmargin = (backgrounddivwidth - imgwidth) / 2;
+    leftmargin =
+      backgrounddivwidth - imgwidth + Number(gamestatusdiv.clientWidth);
   }
-  //need to decide on info placement before determing best way to identify characters
-  console.log(img.clientWidth, backgroundiv.clientWidth);
   const background = document.getElementById("background");
   const div = document.createElement("div");
   div.style.position = "absolute";
-  div.style.width = "30px";
-  div.style.height = "30px";
-  div.style.border = "2px solid red";
+  div.style.width = "40px";
+  div.style.height = "40px";
+  div.style.border = "3px solid black";
   div.style.borderRadius = "25px";
-  div.style.top = coordy - 5 + "px";
-  div.style.left = leftmargin + coordx - 15 + "px";
+  div.style.top = coordy - 20 + "px";
+  div.style.left = leftmargin + coordx - 20 + "px";
   div.style.zIndex = "1";
   div.setAttribute("id", character + "Found");
   background.appendChild(div);
 };
 
-export { createDropDown, drawCircleAroundCharacter, addImagesToStartPage };
-//1693 1908
+const updateStatusSideBar = function (datasetcharacter) {
+  const allCharacters = [
+    { setname: "waldoLocation", aliasondiv: "waldothumbnail" },
+    { setname: "odlawLocation", aliasondiv: "odlawthumbnail" },
+    { setname: "wendaLocation", aliasondiv: "wendathumbnail" },
+    { setname: "wizardLocation", aliasondiv: "wizardthumbnail" },
+    { setname: "woofLocation", aliasondiv: "woofthumbnail" },
+  ];
+  const findcharactername = allCharacters.find(
+    (element) => element.setname === datasetcharacter
+  );
+  const characterdivondom = document.getElementById(
+    findcharactername.aliasondiv
+  );
+  characterdivondom.classList.add("found");
+};
+
+const createPrettyAlert = function (eventtarget) {
+  const allCharacters = [
+    { setname: "waldoLocation", name: "Waldo" },
+    { setname: "odlawLocation", name: "Odlaw" },
+    { setname: "wendaLocation", name: "Wenda" },
+    { setname: "wizardLocation", name: "Wizard Whitebeard" },
+    { setname: "woofLocation", name: "Woof" },
+  ];
+  const foundCharacter = eventtarget.dataset.character;
+  const currentcharacter = allCharacters.find(
+    (element) => element.setname === foundCharacter
+  );
+  const overlaydiv = document.createElement("div");
+  const gamediv = document.getElementById("game");
+  const currentwidth = gamediv.clientWidth;
+  const currentheight = gamediv.clientHeight;
+  overlaydiv.setAttribute("id", "foundoverlay");
+  // overlaydiv.style.top = currentheight - overlaydiv.height / 2;
+  // overlaydiv.style.left = currentwidth - overlaydiv.width / 2;
+  const para = document.createElement("p");
+  para.textContent = `You found ${currentcharacter.name}!`;
+  overlaydiv.appendChild(para);
+  gamediv.appendChild(overlaydiv);
+};
+
+export {
+  createDropDown,
+  drawCircleAroundCharacter,
+  addImagesToStartPage,
+  addImagesToGame,
+  updateStatusSideBar,
+  createPrettyAlert,
+};

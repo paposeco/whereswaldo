@@ -4,6 +4,9 @@ import {
   createDropDown,
   drawCircleAroundCharacter,
   addImagesToStartPage,
+  addImagesToGame,
+  updateStatusSideBar,
+  createPrettyAlert,
 } from "./dom.js";
 import { getFirebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "firebase/app";
@@ -139,7 +142,9 @@ const checkIfSelectedCharacterIsCorrect = async function (coord, eventtarget) {
     clickedY <= maxheight &&
     clickedY >= minheight
   ) {
-    alert("Correct!");
+    // alert("Correct!");
+    createPrettyAlert(eventtarget);
+    updateStatusSideBar(eventtarget.dataset.character);
     drawCircleAroundCharacter(
       clickedX,
       clickedY,
@@ -174,6 +179,7 @@ const authStateObserver = function (user) {
     gamediv.style.display = "flex";
     gamestartdiv.style.display = "none";
     displayImage();
+    addImagesToGame();
     //ugly but necessary. by the time inituser was called the image wasn't loaded yet tried to await it but it didn't work
     setTimeout(() => {
       initUser(user.uid);
@@ -240,13 +246,11 @@ const firebaseAppConfig = getFirebaseConfig();
 initializeApp(firebaseAppConfig);
 initFirebaseAuth();
 
-//window.onload = onPageLoad();
 window.onresize = reCalculateLocationsOnResize;
 
 export default checkIfSelectedCharacterIsCorrect;
 
-//check characters found
 //timestamp and compare
 //scoreboard
-//mark found elements
 //high score board. prompt user for name if he's on top 5
+//image loads faster than titles on game
