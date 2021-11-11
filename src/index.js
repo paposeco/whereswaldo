@@ -18,6 +18,7 @@ import {
   getDoc,
   serverTimestamp,
   updateDoc,
+  increment,
 } from "firebase/firestore";
 
 // user should see info when site loads and then see the image and try to find waldo. the user should know that he should try to find the characters asap. also have a reference of characters to look for.
@@ -30,6 +31,7 @@ const displayImage = function () {
   img.setAttribute("id", "backgroundimage");
   background.appendChild(img);
   img.addEventListener("click", (event) => {
+    console.log(event.offsetX, event.offsetY);
     createDropDown(event);
   });
 };
@@ -132,18 +134,18 @@ const checkIfSelectedCharacterIsCorrect = async function (coord, eventtarget) {
   const clickedTargetLocationOnDB = await getLocationFromDB(
     eventtarget.dataset.character
   );
-  const minwidth = Number(clickedTargetLocationOnDB.minwidth);
-  const maxwidth = Number(clickedTargetLocationOnDB.maxwidth);
-  const minheight = Number(clickedTargetLocationOnDB.minheight);
-  const maxheight = Number(clickedTargetLocationOnDB.maxheight);
+  const minwidth = Number(clickedTargetLocationOnDB.location.minwidth);
+  const maxwidth = Number(clickedTargetLocationOnDB.location.maxwidth);
+  const minheight = Number(clickedTargetLocationOnDB.location.minheight);
+  const maxheight = Number(clickedTargetLocationOnDB.location.maxheight);
   if (
     clickedX <= maxwidth &&
     clickedX >= minwidth &&
     clickedY <= maxheight &&
     clickedY >= minheight
   ) {
-    // alert("Correct!");
     createPrettyAlert(eventtarget);
+    updateFoundCharacters(eventtarget.dataset.character);
     updateStatusSideBar(eventtarget.dataset.character);
     drawCircleAroundCharacter(
       clickedX,
@@ -196,13 +198,14 @@ const authStateObserver = function (user) {
 const initUser = async function (uid) {
   try {
     await setDoc(doc(getFirestore(), "users", uid), {
-      waldoLocation: calculateLocations("waldo"),
-      odlawLocation: calculateLocations("odlaw"),
-      wendaLocation: calculateLocations("wenda"),
-      wizardLocation: calculateLocations("wizard"),
-      woofLocation: calculateLocations("woof"),
-      charactersFound: [],
+      waldoLocation: { location: calculateLocations("waldo"), found: false },
+      odlawLocation: { location: calculateLocations("odlaw"), found: false },
+      wendaLocation: { location: calculateLocations("wenda"), found: false },
+      wizardLocation: { location: calculateLocations("wizard"), found: false },
+      woofLocation: { location: calculateLocations("woof"), found: false },
       startingTime: serverTimestamp(),
+      endTime: 0,
+      foundcharacters: 0,
     });
   } catch (error) {
     console.log("Error writing to database ", error);
@@ -220,6 +223,99 @@ const getLocationFromDB = async function (character) {
   }
 };
 
+const updateFoundCharacters = async function (character) {
+  if (getAuth().currentUser === null) {
+    return;
+  }
+  const currentuser = getAuth().currentUser.uid;
+  const docRef = doc(getFirestore(), "users", currentuser);
+  //didn't manage to find how to update fields when the field name is a variable
+  if (character === "waldoLocation") {
+    try {
+      await updateDoc(docRef, {
+        foundcharacters: increment(1),
+        "waldoLocation.found": true,
+      });
+    } catch (error) {
+      console.log("Couldn't update doc in database ", error);
+    }
+  } else if (character === "odlawLocation") {
+    try {
+      await updateDoc(docRef, {
+        foundcharacters: increment(1),
+        "odlawLocation.found": true,
+      });
+    } catch (error) {
+      console.log("Couldn't update doc in database ", error);
+    }
+  } else if (character === "wendaLocation") {
+    try {
+      await updateDoc(docRef, {
+        foundcharacters: increment(1),
+        "wendaLocation.found": true,
+      });
+    } catch (error) {
+      console.log("Couldn't update doc in database ", error);
+    }
+  } else if (character === "wizardLocation") {
+    try {
+      await updateDoc(docRef, {
+        foundcharacters: increment(1),
+        "wizardLocation.found": true,
+      });
+    } catch (error) {
+      console.log("Couldn't update doc in database ", error);
+    }
+  } else if (character === "woofLocation") {
+    try {
+      await updateDoc(docRef, {
+        foundcharacters: increment(1),
+        "woofLocation.found": true,
+      });
+    } catch (error) {
+      console.log("Couldn't update doc in database ", error);
+    }
+  }
+  const numberfoundcharacters = await getNumberOfCharactersFoundFromDB(docRef);
+  if (numberfoundcharacters === 5) {
+    //save timestamp to db
+    console.log("all found");
+  }
+};
+
+const getNumberOfCharactersFoundFromDB = async function (docRef) {
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const alldata = docSnap.data();
+    const numbercharacters = alldata["foundcharacters"];
+    return numbercharacters;
+  }
+};
+
+const scoreboardDB = async function () {
+  const docRef = doc(getFirestore(), "scoreboard");
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    //checkout
+  } else {
+    //create
+    //prompt for name
+    //get timestamp from db
+    try {
+      await setDoc(docRef, {
+        firstplayer: { name: "", time: 0 },
+        secondplayer: { name: "", time: 0 },
+        thirdplayer: { name: "", time: 0 },
+        fourthplayer: { name: "", time: 0 },
+        fifthplayer: { name: "", time: 0 },
+        slowestTime: 0, //for easy access. only gets updated when a fifth player is found
+      });
+    } catch (error) {
+      console.log("Couldn't fetch scoreboard", error);
+    }
+  }
+};
+
 const reCalculateLocationsOnResize = async function () {
   if (getAuth().currentUser === null) {
     return;
@@ -228,11 +324,11 @@ const reCalculateLocationsOnResize = async function () {
   const docRef = doc(getFirestore(), "users", currentuser);
   try {
     await updateDoc(docRef, {
-      waldoLocation: calculateLocations("waldo"),
-      odlawLocation: calculateLocations("odlaw"),
-      wendaLocation: calculateLocations("wenda"),
-      wizardLocation: calculateLocations("wizard"),
-      woofLocation: calculateLocations("woof"),
+      "waldoLocation.location": calculateLocations("waldo"),
+      "odlawLocation.location": calculateLocations("odlaw"),
+      "wendaLocation.location": calculateLocations("wenda"),
+      "wizardLocation.location": calculateLocations("wizard"),
+      "woofLocation.location": calculateLocations("woof"),
     });
   } catch (error) {
     console.log("Couldn't update doc in database ", error);

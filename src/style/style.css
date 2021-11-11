@@ -28,11 +28,34 @@ body {
 #characterselection {
   position: absolute;
   background-color: white;
+  display: flex;
+  flex-direction: column;
+  width: 225px;
+  z-index: 2;
+}
+
+#characterselection button {
+  width: max-content;
+  align-self: flex-end;
+  margin: 5px;
 }
 
 #characterselection ul {
   list-style: none;
-  padding-left: 0;
+  padding: 0px 10px;
+  margin: 0px 5px 5px 5px;
+}
+
+#characterselection ul li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px dotted grey;
+}
+
+#characterselection ul li:hover {
+  cursor: pointer;
+  font-weight: bolder;
 }
 
 #characterToLookFor {
@@ -130,9 +153,51 @@ body {
 
 #foundoverlay {
   position: absolute;
-  width: 250px;
-  height: 100px;
+  width: 300px;
+  height: 150px;
   background: white;
   top: 50%;
   left: 50%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#foundoverlay div {
+  width: 100%;
+}
+
+#closeoverlay {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+#closeoverlay button {
+  margin: 5px;
+}
+
+#foundoverlay div p {
+  margin-top: 2px;
+  text-align: center;
+}
+
+li[data-character="waldoLocation"]:before {
+  content: url("../images/waldomicrothumbnail.jpg");
+}
+
+li[data-character="wendaLocation"]:before {
+  content: url("../images/wendamicrothumbnail.jpg");
+}
+
+li[data-character="odlawLocation"]:before {
+  content: url("../images/odlawmicrothumbnail.jpg");
+}
+
+li[data-character="wizardLocation"]:before {
+  content: url("../images/wizardmicrothumbnail.jpeg");
+}
+
+li[data-character="woofLocation"]:before {
+  content: url("../images/woofmicrothumbnail.jpg");
 }

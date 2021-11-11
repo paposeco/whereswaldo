@@ -61,20 +61,35 @@ const addImagesToGame = function () {
 
 const createDropDown = function (event) {
   const img = document.getElementById("backgroundimage");
+  const backgroundiv = document.getElementById("background");
+  const imgwidth = Number(img.clientWidth);
+  const backgrounddivwidth = Number(backgroundiv.clientWidth);
+  const gamestatusdiv = document.getElementById("gamestatus");
+  let leftmargin = 0;
+  if (backgrounddivwidth > imgwidth) {
+    leftmargin =
+      backgrounddivwidth - imgwidth + Number(gamestatusdiv.clientWidth);
+  }
+
   if (document.getElementById("characterselection") !== null) {
     document.getElementById("characterselection").remove();
   }
   const div = document.createElement("div");
   div.setAttribute("id", "characterselection");
-  const marginleft =
-    (Number(document.documentElement.clientWidth) - Number(img.clientWidth)) /
-    2;
-  div.style.top = event.offsetY - 50 + "px";
-  div.style.left = event.offsetX + marginleft + 20 + "px";
+  const closediv = document.createElement("button");
+  closediv.innerHTML = "x";
+  let topoffset = event.offsetY - 20 - 320 + "px";
+  const extractnumberfromtopoffset = topoffset.split("p")[0];
+  if (extractnumberfromtopoffset < 0) {
+    topoffset = "10px";
+  }
+  div.style.top = topoffset;
+  div.style.left = event.offsetX + leftmargin + 20 + "px";
   const ul = document.createElement("ul");
   const liwaldo = document.createElement("li");
   liwaldo.textContent = "Waldo";
   liwaldo.setAttribute("data-character", "waldoLocation");
+
   const liodlaw = document.createElement("li");
   liodlaw.textContent = "Odlaw";
   liodlaw.setAttribute("data-character", "odlawLocation");
@@ -93,9 +108,7 @@ const createDropDown = function (event) {
   ul.appendChild(liwenda);
   ul.appendChild(liwhitebeard);
   ul.appendChild(liwoof);
-  let selectedCharacter;
   const clickLocation = [event.offsetX, event.offsetY];
-  console.log(event.offsetX, event.offsetY);
   const characters = [liwaldo, liodlaw, liwenda, liwhitebeard, liwoof];
   for (let i = 0; i < characters.length; i++) {
     characters[i].addEventListener("click", (anotherevent) => {
@@ -103,13 +116,16 @@ const createDropDown = function (event) {
       div.remove();
     });
   }
+  closediv.addEventListener("click", () => {
+    div.remove();
+  });
 
   background.appendChild(div);
+  div.appendChild(closediv);
   div.appendChild(ul);
 };
 
-//need to calculate img.clientwidth and window.clientwidth and try to find a way to calculate where div should be placed
-
+//on resize doesn't draw on the correct place
 const drawCircleAroundCharacter = function (coordx, coordy, character) {
   const img = document.getElementById("backgroundimage");
   const backgroundiv = document.getElementById("background");
@@ -121,7 +137,6 @@ const drawCircleAroundCharacter = function (coordx, coordy, character) {
     leftmargin =
       backgrounddivwidth - imgwidth + Number(gamestatusdiv.clientWidth);
   }
-  const background = document.getElementById("background");
   const div = document.createElement("div");
   div.style.position = "absolute";
   div.style.width = "40px";
@@ -166,14 +181,21 @@ const createPrettyAlert = function (eventtarget) {
   );
   const overlaydiv = document.createElement("div");
   const gamediv = document.getElementById("game");
-  const currentwidth = gamediv.clientWidth;
-  const currentheight = gamediv.clientHeight;
   overlaydiv.setAttribute("id", "foundoverlay");
-  // overlaydiv.style.top = currentheight - overlaydiv.height / 2;
-  // overlaydiv.style.left = currentwidth - overlaydiv.width / 2;
+  const buttondiv = document.createElement("div");
+  buttondiv.setAttribute("id", "closeoverlay");
+  const annoucementdiv = document.createElement("div");
+  overlaydiv.appendChild(buttondiv);
+  overlaydiv.appendChild(annoucementdiv);
+  const closebutton = document.createElement("button");
+  closebutton.innerHTML = "x";
+  buttondiv.appendChild(closebutton);
+  closebutton.addEventListener("click", () => {
+    overlaydiv.remove();
+  });
   const para = document.createElement("p");
   para.textContent = `You found ${currentcharacter.name}!`;
-  overlaydiv.appendChild(para);
+  annoucementdiv.appendChild(para);
   gamediv.appendChild(overlaydiv);
 };
 
