@@ -199,6 +199,13 @@ const createPrettyAlert = function (eventtarget) {
   gamediv.appendChild(overlaydiv);
 };
 
+const promptUserForName = function () {
+  const username = window.prompt(
+    "Congratulations, you made it to the scoreboard! What should we call you?"
+  );
+  return username;
+};
+
 export {
   createDropDown,
   drawCircleAroundCharacter,
@@ -206,4 +213,5 @@ export {
   addImagesToGame,
   updateStatusSideBar,
   createPrettyAlert,
+  promptUserForName,
 };

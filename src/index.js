@@ -7,6 +7,7 @@ import {
   addImagesToGame,
   updateStatusSideBar,
   createPrettyAlert,
+  promptUserForName,
 } from "./dom.js";
 import { getFirebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "firebase/app";
@@ -203,7 +204,7 @@ const initUser = async function (uid) {
       wendaLocation: { location: calculateLocations("wenda"), found: false },
       wizardLocation: { location: calculateLocations("wizard"), found: false },
       woofLocation: { location: calculateLocations("woof"), found: false },
-      startingTime: serverTimestamp(),
+      startTime: serverTimestamp(),
       endTime: 0,
       foundcharacters: 0,
     });
@@ -278,8 +279,15 @@ const updateFoundCharacters = async function (character) {
   }
   const numberfoundcharacters = await getNumberOfCharactersFoundFromDB(docRef);
   if (numberfoundcharacters === 5) {
-    //save timestamp to db
-    console.log("all found");
+    try {
+      await updateDoc(docRef, {
+        endTime: serverTimestamp(),
+      });
+    } catch (error) {
+      console.log("Couldn't save timestamp for end of round ", error);
+    }
+    //updatescoreboard
+    scoreboardDB(currentuser);
   }
 };
 
@@ -292,27 +300,136 @@ const getNumberOfCharactersFoundFromDB = async function (docRef) {
   }
 };
 
-const scoreboardDB = async function () {
-  const docRef = doc(getFirestore(), "scoreboard");
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    //checkout
+const scoreboardDB = async function (userid) {
+  const docRefScoreboard = doc(getFirestore(), "scoreboard", "scoredata");
+  const docSnapScoreboard = await getDoc(docRefScoreboard);
+
+  const docRefPlayer = doc(getFirestore(), "users", userid);
+  const docSnapPlayer = await getDoc(docRefPlayer);
+  let timeToFinish = 0;
+  if (docSnapPlayer.exists()) {
+    const playerdata = docSnapPlayer.data();
+    const startTime = playerdata["startTime"];
+    const endTime = playerdata["endTime"];
+    timeToFinish = Math.ceil(Number(endTime) - Number(startTime));
   } else {
-    //create
-    //prompt for name
-    //get timestamp from db
-    try {
-      await setDoc(docRef, {
-        firstplayer: { name: "", time: 0 },
-        secondplayer: { name: "", time: 0 },
-        thirdplayer: { name: "", time: 0 },
-        fourthplayer: { name: "", time: 0 },
-        fifthplayer: { name: "", time: 0 },
-        slowestTime: 0, //for easy access. only gets updated when a fifth player is found
-      });
-    } catch (error) {
-      console.log("Couldn't fetch scoreboard", error);
+    console.log("player not found");
+  }
+
+  if (docSnapScoreboard.exists()) {
+    const scoreboarddata = docSnapScoreboard.data();
+    const currentPlayersInScoreboard = scoreboarddata["players"];
+    const currentAnonymous = scoreboarddata["anonymousplayers"];
+    // sends current players in scoreboard and current anonymous counter to be evaluated
+    const placementInScoreboard = await evaluateScores(
+      currentPlayersInScoreboard,
+      timeToFinish,
+      currentAnonymous,
+      userid
+    );
+
+    // player didn't make it to the scoreboard
+    if (placementInScoreboard[0] === false) {
+      console.log("didn't make it");
+    } else {
+      //player made it to the scoreboard but didn't provide a name
+      if (placementInScoreboard[2] === true) {
+        try {
+          await updateDoc(docRefScoreboard, {
+            players: placementInScoreboard[1],
+            anonymousplayers: increment(1),
+          });
+        } catch (error) {
+          console.log("Couldn't update scoreboard ", error);
+        }
+      } else {
+        //player made it to the scoreboard and provided a name
+        try {
+          await updateDoc(docRefScoreboard, {
+            players: placementInScoreboard[1],
+          });
+        } catch (error) {
+          console.log("Couldn't update scoreboard ", error);
+        }
+      }
     }
+  }
+};
+
+//check user prompted name
+
+const evaluateScores = async function (
+  currentPlayersArray,
+  newplayerScore,
+  currentanonymous,
+  userid
+) {
+  // get scores
+  let currentScores = [];
+  let currentUserIds = [];
+  let copyOriginalPlayerArray = copyArrayValues(currentPlayersArray);
+  const copyofcopy = copyArrayValues(copyOriginalPlayerArray);
+  currentPlayersArray.forEach((obj) => {
+    currentScores.push(obj.time);
+    currentUserIds.push(obj.userindb);
+  });
+  // compares current scores with user score
+  const madeItToScoreboard = currentScores.findIndex(
+    (score) => Number(score) === 0 || Number(score) > Number(newplayerScore)
+  );
+
+  let anonymoususer = false;
+  if (madeItToScoreboard !== undefined) {
+    // user score is better than at least a score on db; checks if user is already on scoreboard
+
+    const userAlreadyOnScoreboard = currentUserIds.findIndex(
+      (auserid) => auserid === userid
+    );
+    let userSelectedName;
+
+    if (userAlreadyOnScoreboard !== undefined) {
+      // user exists
+      userSelectedName = currentPlayersArray[userAlreadyOnScoreboard].name;
+    } else {
+      // ask for a name
+      userSelectedName = promptUserForName();
+      if (userSelectedName === undefined) {
+        userSelectedName = "Anonymous" + Number(currentanonymous + 1);
+        // anonymous user is now true so that later on the number of anonymous users gets incremented in db
+        anonymoususer = true;
+      }
+    }
+
+    // I don't trust the index. but let's pretend this won't be a problem
+
+    //0 and 1 mix; index on array and placement differ by 1
+    const firstPlayerToChangeScore = madeItToScoreboard + 1;
+    const totalNumberPlayerToChange = 6 - firstPlayerToChangeScore;
+    for (let i = 0; i < totalNumberPlayerToChange; i++) {
+      //update array of winners starting with the current player
+      if (i === 0) {
+        copyOriginalPlayerArray[
+          firstPlayerToChangeScore + (i - 1)
+        ].name = userSelectedName;
+        copyOriginalPlayerArray[
+          firstPlayerToChangeScore + (i - 1)
+        ].time = newplayerScore;
+        copyOriginalPlayerArray[
+          firstPlayerToChangeScore + (i - 1)
+        ].userindb = userid;
+      } else {
+        //copy what was on the old array at the previous index
+        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].name =
+          copyofcopy[firstPlayerToChangeScore + (i - 1) - 1].name;
+        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].time =
+          copyofcopy[firstPlayerToChangeScore + (i - 1) - 1].time;
+        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].userindb =
+          copyofcopy[firstPlayerToChangeScore + (i - 1) - 1].userindb;
+      }
+    }
+    return [true, copyOriginalPlayerArray, anonymoususer];
+  } else {
+    return [false, copyOriginalPlayerArray, anonymoususer];
   }
 };
 
@@ -335,6 +452,26 @@ const reCalculateLocationsOnResize = async function () {
   }
 };
 
+// is there a situation in which this doesn't work?
+const copyArrayValues = function (arrayOfObjects) {
+  let resultingarray = [];
+  for (let i = 0; i < arrayOfObjects.length; i++) {
+    const oldobj = arrayOfObjects[i];
+    const objname = oldobj.name;
+    const objtime = oldobj.time;
+    const objalias = oldobj.alias;
+    const objuserindb = oldobj.userindb;
+    const makenewobj = {
+      name: objname,
+      time: objtime,
+      alias: objalias,
+      userindb: objuserindb,
+    };
+    resultingarray.push(makenewobj);
+  }
+  return resultingarray;
+};
+
 const loginbutton = document.getElementById("login");
 loginbutton.addEventListener("click", signIn);
 
@@ -350,3 +487,10 @@ export default checkIfSelectedCharacterIsCorrect;
 //scoreboard
 //high score board. prompt user for name if he's on top 5
 //image loads faster than titles on game
+
+//only update corresponding user don't prompt for name if user exists
+//checks user given name
+
+//maybe i should clear user endtime or does it get updated every time? maybe it does
+// if you click somewhere and the alert wasn0t closed, close the alert; on esc remove div
+//if user already on db, if the user gets to the scoreboard, should receive notification
