@@ -206,6 +206,51 @@ const promptUserForName = function () {
   return username;
 };
 
+const displayScoreboard = function (scoreboardarray) {
+  const overlaydiv = document.createElement("div");
+  const gamediv = document.getElementById("game");
+  overlaydiv.setAttribute("id", "scoreboarddiv");
+  const buttondiv = document.createElement("div");
+  buttondiv.setAttribute("id", "closescoreboarddiv");
+  const button = document.createElement("button");
+  button.innerHTML = "x";
+  buttondiv.appendChild(button);
+  const annoucementdiv = document.createElement("div");
+  const title = document.createElement("h2");
+  title.textContent = "Best Five Players";
+  const table = document.createElement("table");
+  const tbody = document.createElement("tbody");
+
+  for (let i = 0; i < scoreboardarray.length; i++) {
+    if (scoreboardarray[i].name === "") {
+      break;
+    }
+    const newrow = document.createElement("tr");
+    const placement = i + 1 + ".";
+    const playername = scoreboardarray[i].name;
+    const playerscore = scoreboardarray[i].time;
+    const tdPlacement = document.createElement("td");
+    const tdPlacementText = document.createTextNode(placement);
+    tdPlacement.appendChild(tdPlacementText);
+    const tdName = document.createElement("td");
+    const tdNameText = document.createTextNode(playername);
+    tdName.appendChild(tdNameText);
+    const tdScore = document.createElement("td");
+    const tdScoreText = document.createTextNode(playerscore);
+    tdScore.appendChild(tdScoreText);
+    newrow.appendChild(tdPlacement);
+    newrow.appendChild(tdName);
+    newrow.appendChild(tdScore);
+    tbody.appendChild(newrow);
+  }
+  table.appendChild(tbody);
+  annoucementdiv.appendChild(title);
+  annoucementdiv.appendChild(table);
+  overlaydiv.appendChild(buttondiv);
+  overlaydiv.appendChild(annoucementdiv);
+  gamediv.appendChild(overlaydiv);
+};
+
 export {
   createDropDown,
   drawCircleAroundCharacter,
@@ -214,4 +259,5 @@ export {
   updateStatusSideBar,
   createPrettyAlert,
   promptUserForName,
+  displayScoreboard,
 };

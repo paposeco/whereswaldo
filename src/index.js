@@ -8,6 +8,7 @@ import {
   updateStatusSideBar,
   createPrettyAlert,
   promptUserForName,
+  displayScoreboard,
 } from "./dom.js";
 import { getFirebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "firebase/app";
@@ -352,6 +353,7 @@ const scoreboardDB = async function (userid) {
           console.log("Couldn't update scoreboard ", error);
         }
       }
+      displayScoreboard(placementInScoreboard[1]);
     }
   }
 };
@@ -494,3 +496,5 @@ export default checkIfSelectedCharacterIsCorrect;
 //maybe i should clear user endtime or does it get updated every time? maybe it does
 // if you click somewhere and the alert wasn0t closed, close the alert; on esc remove div
 //if user already on db, if the user gets to the scoreboard, should receive notification
+//show scoreboard at the end of the page or something
+//show score to user and current high scores

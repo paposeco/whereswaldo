@@ -201,3 +201,43 @@ li[data-character="wizardLocation"]:before {
 li[data-character="woofLocation"]:before {
   content: url("../images/woofmicrothumbnail.jpg");
 }
+
+#scoreboarddiv {
+  position: absolute;
+  top: 25%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  justify-content: center;
+  width: 30vw;
+  left: 40vw;
+}
+
+#scoreboarddiv h2 {
+  text-align: center;
+}
+
+#scoreboarddiv table {
+  width: 100%;
+  padding: 35px;
+}
+
+#scoreboarddiv table tr {
+  height: 75px;
+  font-size: 25px;
+}
+
+#scoreboarddiv table tr td:last-child {
+  text-align: right;
+}
+
+#closescoreboarddiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+#closescoreboarddiv button {
+  margin: 5px;
+}
