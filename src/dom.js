@@ -61,9 +61,9 @@ const addImagesToGame = function () {
 
 const createDropDown = function (event) {
   const img = document.getElementById("backgroundimage");
-  const backgroundiv = document.getElementById("background");
+  const backgrounddiv = document.getElementById("background");
   const imgwidth = Number(img.clientWidth);
-  const backgrounddivwidth = Number(backgroundiv.clientWidth);
+  const backgrounddivwidth = Number(backgrounddiv.clientWidth);
   const gamestatusdiv = document.getElementById("gamestatus");
   let leftmargin = 0;
   if (backgrounddivwidth > imgwidth) {
@@ -120,7 +120,7 @@ const createDropDown = function (event) {
     div.remove();
   });
 
-  background.appendChild(div);
+  backgrounddiv.appendChild(div);
   div.appendChild(closediv);
   div.appendChild(ul);
 };
