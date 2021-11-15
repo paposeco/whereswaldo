@@ -147,7 +147,7 @@ const drawCircleAroundCharacter = function (coordx, coordy, character) {
   div.style.left = leftmargin + coordx - 20 + "px";
   div.style.zIndex = "1";
   div.setAttribute("id", character + "Found");
-  background.appendChild(div);
+  backgroundiv.appendChild(div);
 };
 
 const updateStatusSideBar = function (datasetcharacter) {
@@ -197,6 +197,9 @@ const createPrettyAlert = function (eventtarget) {
   para.textContent = `You found ${currentcharacter.name}!`;
   annoucementdiv.appendChild(para);
   gamediv.appendChild(overlaydiv);
+  setTimeout(() => {
+    overlaydiv.remove();
+  }, 2500);
 };
 
 const promptUserForName = function () {
@@ -206,7 +209,17 @@ const promptUserForName = function () {
   return username;
 };
 
-const displayScoreboard = function (scoreboardarray) {
+const displayScoreboard = function (
+  playerHasHighScore,
+  scoreboardarray,
+  currentuserscore
+) {
+  let message = "";
+  if (playerHasHighScore) {
+    message = "Congratulations! You made it to the High Score board!";
+  } else {
+    message = `You were too slow. It took you ${currentuserscore} seconds to finish.`;
+  }
   const overlaydiv = document.createElement("div");
   const gamediv = document.getElementById("game");
   overlaydiv.setAttribute("id", "scoreboarddiv");
@@ -216,6 +229,9 @@ const displayScoreboard = function (scoreboardarray) {
   button.innerHTML = "x";
   buttondiv.appendChild(button);
   const annoucementdiv = document.createElement("div");
+  const playerScore = document.createElement("p");
+  playerScore.setAttribute("id", "playermessage");
+  playerScore.textContent = message;
   const title = document.createElement("h2");
   title.textContent = "Best Five Players";
   const table = document.createElement("table");
@@ -244,6 +260,7 @@ const displayScoreboard = function (scoreboardarray) {
     tbody.appendChild(newrow);
   }
   table.appendChild(tbody);
+  annoucementdiv.appendChild(playerScore);
   annoucementdiv.appendChild(title);
   annoucementdiv.appendChild(table);
   overlaydiv.appendChild(buttondiv);

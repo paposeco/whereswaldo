@@ -331,6 +331,11 @@ const scoreboardDB = async function (userid) {
 
     // player didn't make it to the scoreboard
     if (placementInScoreboard[0] === false) {
+      displayScoreboard(
+        placementInScoreboard[0],
+        placementInScoreboard[1],
+        timeToFinish
+      );
       console.log("didn't make it");
     } else {
       //player made it to the scoreboard but didn't provide a name
@@ -353,7 +358,11 @@ const scoreboardDB = async function (userid) {
           console.log("Couldn't update scoreboard ", error);
         }
       }
-      displayScoreboard(placementInScoreboard[1]);
+      displayScoreboard(
+        placementInScoreboard[0],
+        placementInScoreboard[1],
+        timeToFinish
+      );
     }
   }
 };
@@ -381,7 +390,7 @@ const evaluateScores = async function (
   );
 
   let anonymoususer = false;
-  if (madeItToScoreboard !== undefined) {
+  if (madeItToScoreboard !== -1) {
     // user score is better than at least a score on db; checks if user is already on scoreboard
 
     const userAlreadyOnScoreboard = currentUserIds.findIndex(
@@ -389,7 +398,7 @@ const evaluateScores = async function (
     );
     let userSelectedName;
 
-    if (userAlreadyOnScoreboard !== undefined) {
+    if (userAlreadyOnScoreboard !== -1) {
       // user exists
       userSelectedName = currentPlayersArray[userAlreadyOnScoreboard].name;
     } else {
@@ -484,17 +493,3 @@ initFirebaseAuth();
 window.onresize = reCalculateLocationsOnResize;
 
 export default checkIfSelectedCharacterIsCorrect;
-
-//timestamp and compare
-//scoreboard
-//high score board. prompt user for name if he's on top 5
-//image loads faster than titles on game
-
-//only update corresponding user don't prompt for name if user exists
-//checks user given name
-
-//maybe i should clear user endtime or does it get updated every time? maybe it does
-// if you click somewhere and the alert wasn0t closed, close the alert; on esc remove div
-//if user already on db, if the user gets to the scoreboard, should receive notification
-//show scoreboard at the end of the page or something
-//show score to user and current high scores
