@@ -419,15 +419,12 @@ const evaluateScores = async function (
     for (let i = 0; i < totalNumberPlayerToChange; i++) {
       //update array of winners starting with the current player
       if (i === 0) {
-        copyOriginalPlayerArray[
-          firstPlayerToChangeScore + (i - 1)
-        ].name = userSelectedName;
-        copyOriginalPlayerArray[
-          firstPlayerToChangeScore + (i - 1)
-        ].time = newplayerScore;
-        copyOriginalPlayerArray[
-          firstPlayerToChangeScore + (i - 1)
-        ].userindb = userid;
+        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].name =
+          userSelectedName;
+        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].time =
+          newplayerScore;
+        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].userindb =
+          userid;
       } else {
         //copy what was on the old array at the previous index
         copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].name =
@@ -493,3 +490,8 @@ initFirebaseAuth();
 window.onresize = reCalculateLocationsOnResize;
 
 export default checkIfSelectedCharacterIsCorrect;
+
+//manage large usernames
+// on refresh, if user already as an incomplete gameplay
+//noone should be allowed to play twice on the same user
+//wrong character should be an overlay

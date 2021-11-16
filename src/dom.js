@@ -218,7 +218,7 @@ const displayScoreboard = function (
   if (playerHasHighScore) {
     message = "Congratulations! You made it to the High Score board!";
   } else {
-    message = `You were too slow. It took you ${currentuserscore} seconds to finish.`;
+    message = `You were too slow. It took you ${currentuserscore} seconds to find everyone.`;
   }
   const overlaydiv = document.createElement("div");
   const gamediv = document.getElementById("game");
