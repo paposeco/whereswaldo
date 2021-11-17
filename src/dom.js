@@ -4,6 +4,7 @@ import odlawThumbnail from "./images/odlawthumbnail.jpg";
 import wendaThumbnail from "./images/wendathumbnail.jpg";
 import wizardThumbnail from "./images/wizardthumbnail.jpeg";
 import woofThumbnail from "./images/woofthumbnail.jpg";
+import BackgroundImage from "./images/waldo.jpeg";
 import { getAuth } from "firebase/auth";
 
 const addImagesToStartPage = function () {
@@ -25,6 +26,18 @@ const addImagesToStartPage = function () {
     img.setAttribute("class", "characterthumbnail");
     charactersDiv.appendChild(img);
   }
+};
+
+const displayImage = function () {
+  const background = document.getElementById("background");
+  const img = document.createElement("img");
+  img.src = BackgroundImage;
+  img.alt = "backgroundimage";
+  img.setAttribute("id", "backgroundimage");
+  background.appendChild(img);
+  img.addEventListener("click", (event) => {
+    createDropDown(event);
+  });
 };
 
 const addImagesToGame = function () {
@@ -167,18 +180,7 @@ const updateStatusSideBar = function (datasetcharacter) {
   characterdivondom.classList.add("found");
 };
 
-const createPrettyAlert = function (eventtarget) {
-  const allCharacters = [
-    { setname: "waldoLocation", name: "Waldo" },
-    { setname: "odlawLocation", name: "Odlaw" },
-    { setname: "wendaLocation", name: "Wenda" },
-    { setname: "wizardLocation", name: "Wizard Whitebeard" },
-    { setname: "woofLocation", name: "Woof" },
-  ];
-  const foundCharacter = eventtarget.dataset.character;
-  const currentcharacter = allCharacters.find(
-    (element) => element.setname === foundCharacter
-  );
+const createPrettyAlert = function (characterfound, eventtarget) {
   const overlaydiv = document.createElement("div");
   const gamediv = document.getElementById("game");
   overlaydiv.setAttribute("id", "foundoverlay");
@@ -194,7 +196,24 @@ const createPrettyAlert = function (eventtarget) {
     overlaydiv.remove();
   });
   const para = document.createElement("p");
-  para.textContent = `You found ${currentcharacter.name}!`;
+  if (characterfound) {
+    const allCharacters = [
+      { setname: "waldoLocation", name: "Waldo" },
+      { setname: "odlawLocation", name: "Odlaw" },
+      { setname: "wendaLocation", name: "Wenda" },
+      { setname: "wizardLocation", name: "Wizard Whitebeard" },
+      { setname: "woofLocation", name: "Woof" },
+    ];
+    const foundCharacter = eventtarget.dataset.character;
+    const currentcharacter = allCharacters.find(
+      (element) => element.setname === foundCharacter
+    );
+
+    para.textContent = `You found ${currentcharacter.name}!`;
+  } else {
+    para.textContent = "The selected character isn't at that location.";
+  }
+
   annoucementdiv.appendChild(para);
   gamediv.appendChild(overlaydiv);
   setTimeout(() => {
@@ -203,9 +222,12 @@ const createPrettyAlert = function (eventtarget) {
 };
 
 const promptUserForName = function () {
-  const username = window.prompt(
-    "Congratulations, you made it to the scoreboard! What should we call you?"
+  let username = window.prompt(
+    "Congratulations, you made it to the scoreboard! What should we call you? (max 12 characters)"
   );
+  if (username.length > 12) {
+    username = username.substring(0, 12);
+  }
   return username;
 };
 
@@ -215,10 +237,14 @@ const displayScoreboard = function (
   currentuserscore
 ) {
   let message = "";
-  if (playerHasHighScore) {
-    message = "Congratulations! You made it to the High Score board!";
+  if (currentuserscore === null) {
+    message = "";
   } else {
-    message = `You were too slow. It took you ${currentuserscore} seconds to find everyone.`;
+    if (playerHasHighScore) {
+      message = "Congratulations! You made it to the High Score board!";
+    } else {
+      message = `You were too slow. It took you ${currentuserscore} seconds to find everyone.`;
+    }
   }
   const overlaydiv = document.createElement("div");
   const gamediv = document.getElementById("game");
@@ -226,6 +252,7 @@ const displayScoreboard = function (
   const buttondiv = document.createElement("div");
   buttondiv.setAttribute("id", "closescoreboarddiv");
   const button = document.createElement("button");
+  button.setAttribute("id", "closescoreboardbutton");
   button.innerHTML = "x";
   buttondiv.appendChild(button);
   const annoucementdiv = document.createElement("div");
@@ -238,17 +265,22 @@ const displayScoreboard = function (
   const tbody = document.createElement("tbody");
 
   for (let i = 0; i < scoreboardarray.length; i++) {
-    if (scoreboardarray[i].name === "") {
-      break;
-    }
     const newrow = document.createElement("tr");
     const placement = i + 1 + ".";
-    const playername = scoreboardarray[i].name;
-    const playerscore = scoreboardarray[i].time;
     const tdPlacement = document.createElement("td");
     const tdPlacementText = document.createTextNode(placement);
     tdPlacement.appendChild(tdPlacementText);
     const tdName = document.createElement("td");
+
+    let playername;
+    let playerscore;
+    if (scoreboardarray[i].name === "") {
+      playername = "";
+      playerscore = "";
+    } else {
+      playername = scoreboardarray[i].name;
+      playerscore = scoreboardarray[i].time;
+    }
     const tdNameText = document.createTextNode(playername);
     tdName.appendChild(tdNameText);
     const tdScore = document.createElement("td");
@@ -268,8 +300,42 @@ const displayScoreboard = function (
   gamediv.appendChild(overlaydiv);
 };
 
+const updateDomAfterRefresh = function (data) {
+  const numberoffoundcharacters = data.foundcharacters;
+  const allcharacters = [
+    { name: "waldoLocation", characterdata: data.waldoLocation },
+    { name: "odlawLocation", characterdata: data.odlawLocation },
+    { name: "wendaLocation", characterdata: data.wendaLocation },
+    { name: "wizardLocation", characterdata: data.wizardLocation },
+    { name: "woodLocation", characterdata: data.woofLocation },
+  ];
+  let foundcharacters = 0;
+  for (let i = 0; i < allcharacters.length; i++) {
+    if (allcharacters[i].characterdata.found) {
+      foundcharacters++;
+      const charactersLocation = allcharacters[i].characterdata.location;
+      const coordx =
+        Number(charactersLocation.minwidth) -
+        2 +
+        (Number(charactersLocation.maxwidth) -
+          Number(charactersLocation.minwidth)) /
+          2;
+      const coordy =
+        Number(charactersLocation.minheight) -
+        4 +
+        (Number(charactersLocation.maxheight) -
+          Number(charactersLocation.minheight)) /
+          2;
+      drawCircleAroundCharacter(coordx, coordy, allcharacters[i].name);
+      updateStatusSideBar(allcharacters[i].name);
+      if (foundcharacters === numberoffoundcharacters) {
+        break;
+      }
+    }
+  }
+};
+
 export {
-  createDropDown,
   drawCircleAroundCharacter,
   addImagesToStartPage,
   addImagesToGame,
@@ -277,4 +343,6 @@ export {
   createPrettyAlert,
   promptUserForName,
   displayScoreboard,
+  displayImage,
+  updateDomAfterRefresh,
 };

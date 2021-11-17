@@ -222,6 +222,9 @@ h4 {
 #closeoverlay button {
   margin: 5px;
   box-shadow: 2px 2px 1px #0f6dc5;
+  padding: 0;
+  height: 20px;
+  width: 20px;
 }
 
 #closeoverlay button:hover {
@@ -300,6 +303,9 @@ li[data-character="woofLocation"]:before {
 
 #closescoreboarddiv button {
   box-shadow: 2px 2px 1px #0f6dc5;
+  padding: 0;
+  height: 20px;
+  width: 20px;
   margin: 5px;
 }
 
@@ -385,4 +391,18 @@ button {
   font-size: 28px;
   text-align: center;
   margin: 5px auto;
+}
+
+#highestscoreslink h4 {
+  text-align: center;
+  background: white;
+  border-radius: 0px;
+  outline: none;
+  cursor: pointer;
+  border: 2px solid lightgrey;
+  box-shadow: 4px 4px 2px #0f6dc5;
+  font-size: 16px;
+  padding: 10px;
+  margin: 20px auto 10px;
+  width: 125px;
 }

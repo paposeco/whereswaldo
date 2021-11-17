@@ -1,7 +1,5 @@
 import "./style/style.css";
-import BackgroundImage from "./images/waldo.jpeg";
 import {
-  createDropDown,
   drawCircleAroundCharacter,
   addImagesToStartPage,
   addImagesToGame,
@@ -9,6 +7,8 @@ import {
   createPrettyAlert,
   promptUserForName,
   displayScoreboard,
+  displayImage,
+  updateDomAfterRefresh,
 } from "./dom.js";
 import { getFirebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "firebase/app";
@@ -22,21 +22,6 @@ import {
   updateDoc,
   increment,
 } from "firebase/firestore";
-
-// user should see info when site loads and then see the image and try to find waldo. the user should know that he should try to find the characters asap. also have a reference of characters to look for.
-
-const displayImage = function () {
-  const background = document.getElementById("background");
-  const img = document.createElement("img");
-  img.src = BackgroundImage;
-  img.alt = "backgroundimage";
-  img.setAttribute("id", "backgroundimage");
-  background.appendChild(img);
-  img.addEventListener("click", (event) => {
-    console.log(event.offsetX, event.offsetY);
-    createDropDown(event);
-  });
-};
 
 const calculateLocations = function (character) {
   let img = document.getElementById("backgroundimage");
@@ -146,7 +131,7 @@ const checkIfSelectedCharacterIsCorrect = async function (coord, eventtarget) {
     clickedY <= maxheight &&
     clickedY >= minheight
   ) {
-    createPrettyAlert(eventtarget);
+    createPrettyAlert(true, eventtarget);
     updateFoundCharacters(eventtarget.dataset.character);
     updateStatusSideBar(eventtarget.dataset.character);
     drawCircleAroundCharacter(
@@ -156,7 +141,7 @@ const checkIfSelectedCharacterIsCorrect = async function (coord, eventtarget) {
     );
     return true;
   } else {
-    alert("Wrong. Try again");
+    createPrettyAlert(false, eventtarget);
     return false;
   }
 };
@@ -173,8 +158,16 @@ const initFirebaseAuth = function () {
   onAuthStateChanged(getAuth(), authStateObserver);
 };
 
-const authStateObserver = function (user) {
+const authStateObserver = async function (user) {
+  //if user already existed on db dont init and get found characters
+  //on the dom functions there is a provision for when the user plays twice, but that shouldn't exist.
   if (user) {
+    const docRef = doc(getFirestore(), "users", user.uid);
+    const docSnap = await getDoc(docRef);
+    let userHasPlayedBefore = false;
+    if (docSnap.exists()) {
+      userHasPlayedBefore = true;
+    }
     const loadingdiv = document.getElementById("loading");
     loadingdiv.style.display = "none";
     const gamestartdiv = document.getElementById("gamestart");
@@ -184,10 +177,18 @@ const authStateObserver = function (user) {
     gamestartdiv.style.display = "none";
     displayImage();
     addImagesToGame();
+    highestScoresLink();
     //ugly but necessary. by the time inituser was called the image wasn't loaded yet tried to await it but it didn't work
-    setTimeout(() => {
-      initUser(user.uid);
-    }, 1000);
+    if (!userHasPlayedBefore) {
+      setTimeout(() => {
+        initUser(user.uid);
+      }, 1000);
+    } else {
+      //display found characters on page
+      setTimeout(() => {
+        updateDomAfterRefresh(docSnap.data());
+      }, 1000);
+    }
   } else {
     const loadingdiv = document.getElementById("loading");
     loadingdiv.style.display = "none";
@@ -367,8 +368,6 @@ const scoreboardDB = async function (userid) {
   }
 };
 
-//check user prompted name
-
 const evaluateScores = async function (
   currentPlayersArray,
   newplayerScore,
@@ -391,26 +390,13 @@ const evaluateScores = async function (
 
   let anonymoususer = false;
   if (madeItToScoreboard !== -1) {
-    // user score is better than at least a score on db; checks if user is already on scoreboard
-
-    const userAlreadyOnScoreboard = currentUserIds.findIndex(
-      (auserid) => auserid === userid
-    );
-    let userSelectedName;
-
-    if (userAlreadyOnScoreboard !== -1) {
-      // user exists
-      userSelectedName = currentPlayersArray[userAlreadyOnScoreboard].name;
-    } else {
-      // ask for a name
-      userSelectedName = promptUserForName();
-      if (userSelectedName === undefined) {
-        userSelectedName = "Anonymous" + Number(currentanonymous + 1);
-        // anonymous user is now true so that later on the number of anonymous users gets incremented in db
-        anonymoususer = true;
-      }
+    // user score is better than at least a score on db
+    let userSelectedName = promptUserForName();
+    if (userSelectedName === undefined || userSelectedName === "") {
+      userSelectedName = "Anonymous" + Number(currentanonymous + 1);
+      // anonymous user is now true so that later on the number of anonymous users gets incremented in db
+      anonymoususer = true;
     }
-
     // I don't trust the index. but let's pretend this won't be a problem
 
     //0 and 1 mix; index on array and placement differ by 1
@@ -419,12 +405,15 @@ const evaluateScores = async function (
     for (let i = 0; i < totalNumberPlayerToChange; i++) {
       //update array of winners starting with the current player
       if (i === 0) {
-        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].name =
-          userSelectedName;
-        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].time =
-          newplayerScore;
-        copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].userindb =
-          userid;
+        copyOriginalPlayerArray[
+          firstPlayerToChangeScore + (i - 1)
+        ].name = userSelectedName;
+        copyOriginalPlayerArray[
+          firstPlayerToChangeScore + (i - 1)
+        ].time = newplayerScore;
+        copyOriginalPlayerArray[
+          firstPlayerToChangeScore + (i - 1)
+        ].userindb = userid;
       } else {
         //copy what was on the old array at the previous index
         copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].name =
@@ -460,7 +449,24 @@ const reCalculateLocationsOnResize = async function () {
   }
 };
 
-// is there a situation in which this doesn't work?
+const highestScoresLink = function () {
+  const highestscorespara = document.getElementById("highestscoreslink");
+  highestscorespara.addEventListener("click", async function (event) {
+    const docRefScoreboard = doc(getFirestore(), "scoreboard", "scoredata");
+    const docSnapScoreboard = await getDoc(docRefScoreboard);
+    if (docSnapScoreboard.exists()) {
+      const scoreboarddata = docSnapScoreboard.data();
+      const currentPlayersInScoreboard = scoreboarddata["players"];
+      displayScoreboard(null, currentPlayersInScoreboard, null);
+      const closebutton = document.getElementById("closescoreboardbutton");
+      const overlaydiv = document.getElementById("scoreboarddiv");
+      closebutton.addEventListener("click", () => {
+        overlaydiv.remove();
+      });
+    }
+  });
+};
+
 const copyArrayValues = function (arrayOfObjects) {
   let resultingarray = [];
   for (let i = 0; i < arrayOfObjects.length; i++) {
@@ -491,7 +497,6 @@ window.onresize = reCalculateLocationsOnResize;
 
 export default checkIfSelectedCharacterIsCorrect;
 
-//manage large usernames
 // on refresh, if user already as an incomplete gameplay
 //noone should be allowed to play twice on the same user
 //wrong character should be an overlay
