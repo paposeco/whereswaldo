@@ -38,8 +38,11 @@ h4 {
   display: block;
   max-height: 100%;
   max-width: 100%;
-  margin: 0;
-  float: right;
+  margin: 0 auto;
+}
+
+#background {
+  width: 100%;
 }
 
 #characterselection {
@@ -139,42 +142,34 @@ h4 {
 }
 
 .showgame {
-  display: flex;
   height: 100vh;
   width: 100vw;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-
-#gameinfo {
-  /* border-top: 2px #0f6dc5 dotted; */
 }
 
 #gamestatus {
-  display: block;
-  /* width: 300px; */
-  width: calc(100vw - 100vh * 1.6);
-  margin: 0 auto;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
 }
 
 #sidethumbnails {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
   align-items: center;
-  width: 100%;
+  gap: 5px;
 }
 
 .characterthumbnailgame {
-  height: calc(100vh / 8);
-  max-width: 75px;
+  height: 75px;
   padding: 2px;
 }
 
 .divcharacterthumbnail {
   text-align: center;
-  border: 1px grey dotted;
-  width: 175px;
+  background: white;
+  width: 80px;
 }
 
 .divcharacterthumbnail img {
@@ -187,20 +182,12 @@ h4 {
   margin-bottom: 0px;
 }
 
-.found {
-  opacity: 0.5;
-}
-
-.found h4:after {
-  content: "\002714";
-}
-
 #foundoverlay {
   position: absolute;
   width: 300px;
   background: white;
-  top: 5%;
-  left: 50%;
+  top: 10%;
+  left: 40%;
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -260,14 +247,14 @@ li[data-character="woofLocation"]:before {
 
 #scoreboarddiv {
   position: absolute;
-  top: 25%;
+  top: 10%;
+  left: calc((100vw / 2) - ((0.4 * 100vw) / 2));
   z-index: 3;
   display: flex;
   flex-direction: column;
   background: white;
   justify-content: center;
-  width: 30vw;
-  left: 40vw;
+  width: 40%;
   border: 1px solid #0f6dc5;
 }
 
@@ -383,7 +370,13 @@ button {
 }
 
 #gamefooter {
-  margin-top: 20px;
+  /* margin-top: 20px; */
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  z-index: 2;
+  background: white;
+  width: 80px;
 }
 
 #separator {
@@ -393,16 +386,50 @@ button {
   margin: 5px auto;
 }
 
-#highestscoreslink h4 {
-  text-align: center;
-  background: white;
-  border-radius: 0px;
-  outline: none;
-  cursor: pointer;
-  border: 2px solid lightgrey;
+#highestscoreslink {
   box-shadow: 4px 4px 2px #0f6dc5;
-  font-size: 16px;
-  padding: 10px;
-  margin: 20px auto 10px;
-  width: 125px;
+  font-size: 18px;
+}
+
+#highestscoreslink:hover {
+  color: #0f6dc5;
+  box-shadow: inset 1px 1px 2px lightgrey, 4px 4px 2px #0f6dc5;
+}
+
+.check {
+  position: fixed;
+  top: 0;
+}
+
+.check p {
+  color: rgb(46, 52, 54);
+  margin: 0;
+  font-weight: bolder;
+  font-size: 45px;
+  margin-left: 20px;
+  margin-top: 15px;
+}
+
+@media only screen and (max-width: 1300px) {
+  #scoreboarddiv {
+    width: 60%;
+    left: calc((100vw / 2) - ((0.6 * 100vw) / 2));
+  }
+}
+
+@media only screen and (max-width: 850px) {
+  #scoreboarddiv table {
+    padding: 10px 10px;
+  }
+  #scoreboarddiv table tr {
+    height: 50px;
+    font-size: 22px;
+  }
+  #scoreboarddiv h2 {
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+    margin-top: 5px;
+    font-size: 30px;
+    text-align: center;
+  }
 }

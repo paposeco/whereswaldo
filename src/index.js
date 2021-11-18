@@ -444,6 +444,10 @@ const reCalculateLocationsOnResize = async function () {
       "wizardLocation.location": calculateLocations("wizard"),
       "woofLocation.location": calculateLocations("woof"),
     });
+    const allcircles = document.querySelectorAll(".characterfoundcircle");
+    allcircles.forEach((div) => div.remove());
+    const docSnap = await getDoc(docRef);
+    updateDomAfterRefresh(docSnap.data());
   } catch (error) {
     console.log("Couldn't update doc in database ", error);
   }
@@ -496,7 +500,3 @@ initFirebaseAuth();
 window.onresize = reCalculateLocationsOnResize;
 
 export default checkIfSelectedCharacterIsCorrect;
-
-// on refresh, if user already as an incomplete gameplay
-//noone should be allowed to play twice on the same user
-//wrong character should be an overlay

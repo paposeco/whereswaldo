@@ -42,9 +42,9 @@ const displayImage = function () {
 
 const addImagesToGame = function () {
   const sidethumbnailsdiv = document.getElementById("sidethumbnails");
-  const sidetitle = document.createElement("h3");
-  sidetitle.textContent = "Characters";
-  sidethumbnailsdiv.appendChild(sidetitle);
+  // const sidetitle = document.createElement("h3");
+  // sidetitle.textContent = "Characters";
+  // sidethumbnailsdiv.appendChild(sidetitle);
   const allCharacters = [
     { alias: "waldothumbnail", file: waldoThumbnail, name: "Waldo" },
     { alias: "odlawthumbnail", file: odlawThumbnail, name: "Odlaw" },
@@ -61,15 +61,19 @@ const addImagesToGame = function () {
     div.setAttribute("class", "divcharacterthumbnail");
     div.setAttribute("id", allCharacters[i].alias);
     const img = document.createElement("img");
-    const charactername = document.createElement("h4");
-    charactername.textContent = allCharacters[i].name;
+    // const charactername = document.createElement("h4");
+    // charactername.textContent = allCharacters[i].name;
     img.src = allCharacters[i].file;
     img.alt = allCharacters[i].alias;
     img.setAttribute("class", "characterthumbnailgame");
-    div.appendChild(charactername);
+    // div.appendChild(charactername);
     div.appendChild(img);
     sidethumbnailsdiv.appendChild(div);
   }
+  const highscorebutton = document.createElement("button");
+  highscorebutton.textContent = "Highest Scores";
+  highscorebutton.setAttribute("id", "highestscoreslink");
+  sidethumbnailsdiv.appendChild(highscorebutton);
 };
 
 const createDropDown = function (event) {
@@ -80,8 +84,7 @@ const createDropDown = function (event) {
   const gamestatusdiv = document.getElementById("gamestatus");
   let leftmargin = 0;
   if (backgrounddivwidth > imgwidth) {
-    leftmargin =
-      backgrounddivwidth - imgwidth + Number(gamestatusdiv.clientWidth);
+    leftmargin = (backgrounddivwidth - imgwidth) / 2;
   }
 
   if (document.getElementById("characterselection") !== null) {
@@ -147,8 +150,7 @@ const drawCircleAroundCharacter = function (coordx, coordy, character) {
   const gamestatusdiv = document.getElementById("gamestatus");
   let leftmargin = 0;
   if (backgrounddivwidth > imgwidth) {
-    leftmargin =
-      backgrounddivwidth - imgwidth + Number(gamestatusdiv.clientWidth);
+    leftmargin = (backgrounddivwidth - imgwidth) / 2;
   }
   const div = document.createElement("div");
   div.style.position = "absolute";
@@ -160,6 +162,7 @@ const drawCircleAroundCharacter = function (coordx, coordy, character) {
   div.style.left = leftmargin + coordx - 20 + "px";
   div.style.zIndex = "1";
   div.setAttribute("id", character + "Found");
+  div.setAttribute("class", "characterfoundcircle");
   backgroundiv.appendChild(div);
 };
 
@@ -178,6 +181,12 @@ const updateStatusSideBar = function (datasetcharacter) {
     findcharactername.aliasondiv
   );
   characterdivondom.classList.add("found");
+  const div = document.createElement("div");
+  div.setAttribute("class", "check");
+  const para = document.createElement("p");
+  para.innerHTML = '<i class="las la-check"></i>';
+  div.appendChild(para);
+  characterdivondom.appendChild(div);
 };
 
 const createPrettyAlert = function (characterfound, eventtarget) {
