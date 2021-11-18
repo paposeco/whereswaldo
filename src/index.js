@@ -26,7 +26,7 @@ import {
 const calculateLocations = function (character) {
   let img = document.getElementById("backgroundimage");
   switch (character) {
-    case "waldo":
+    case "waldo": {
       const waldoLocationMinWidth = Math.ceil(0.3963 * Number(img.clientWidth));
       const waldoLocationMaxWidth = Math.ceil(0.4123 * Number(img.clientWidth));
       const waldoLocationMinHeight = Math.ceil(
@@ -42,7 +42,8 @@ const calculateLocations = function (character) {
         maxheight: waldoLocationMaxHeight,
       };
       return waldo;
-    case "odlaw":
+    }
+    case "odlaw": {
       const odlawLocationMinWidth = Math.ceil(0.062 * Number(img.clientWidth));
       const odlawLocationMaxWidth = Math.ceil(0.077 * Number(img.clientWidth));
       const odlawLocationMinHeight = Math.ceil(
@@ -58,7 +59,8 @@ const calculateLocations = function (character) {
         maxheight: odlawLocationMaxHeight,
       };
       return odlaw;
-    case "wenda":
+    }
+    case "wenda": {
       const wendaLocationMinWidth = Math.ceil(0.2888 * Number(img.clientWidth));
       const wendaLocationMaxWidth = Math.ceil(0.3006 * Number(img.clientWidth));
       const wendaLocationMinHeight = Math.ceil(
@@ -74,7 +76,8 @@ const calculateLocations = function (character) {
         maxheight: wendaLocationMaxHeight,
       };
       return wenda;
-    case "wizard":
+    }
+    case "wizard": {
       const wizardLocationMinWidth = Math.ceil(
         0.7743 * Number(img.clientWidth)
       );
@@ -94,7 +97,8 @@ const calculateLocations = function (character) {
         maxheight: wizardLocationMaxHeight,
       };
       return wizard;
-    case "woof":
+    }
+    case "woof": {
       const woofLocationMinWidth = Math.ceil(0.5823 * Number(img.clientWidth));
       const woofLocationMaxWidth = Math.ceil(0.5936 * Number(img.clientWidth));
       const woofLocationMinHeight = Math.ceil(
@@ -110,6 +114,7 @@ const calculateLocations = function (character) {
         maxheight: woofLocationMaxHeight,
       };
       return woof;
+    }
     default:
       console.log("error error. wrong character called");
   }
@@ -455,7 +460,7 @@ const reCalculateLocationsOnResize = async function () {
 
 const highestScoresLink = function () {
   const highestscorespara = document.getElementById("highestscoreslink");
-  highestscorespara.addEventListener("click", async function (event) {
+  highestscorespara.addEventListener("click", async function () {
     const docRefScoreboard = doc(getFirestore(), "scoreboard", "scoredata");
     const docSnapScoreboard = await getDoc(docRefScoreboard);
     if (docSnapScoreboard.exists()) {

@@ -81,7 +81,6 @@ const createDropDown = function (event) {
   const backgrounddiv = document.getElementById("background");
   const imgwidth = Number(img.clientWidth);
   const backgrounddivwidth = Number(backgrounddiv.clientWidth);
-  const gamestatusdiv = document.getElementById("gamestatus");
   let leftmargin = 0;
   if (backgrounddivwidth > imgwidth) {
     leftmargin = (backgrounddivwidth - imgwidth) / 2;
@@ -147,7 +146,6 @@ const drawCircleAroundCharacter = function (coordx, coordy, character) {
   const backgroundiv = document.getElementById("background");
   const imgwidth = Number(img.clientWidth);
   const backgrounddivwidth = Number(backgroundiv.clientWidth);
-  const gamestatusdiv = document.getElementById("gamestatus");
   let leftmargin = 0;
   if (backgrounddivwidth > imgwidth) {
     leftmargin = (backgrounddivwidth - imgwidth) / 2;
