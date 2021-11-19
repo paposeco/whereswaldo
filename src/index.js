@@ -193,7 +193,7 @@ const authStateObserver = async function (user) {
       // if user hasn't played before, loads a clean game
       setTimeout(() => {
         initUser(user.uid);
-      });
+      }, 1000);
     } else {
       // if the user has played before, fetches information of found characters from db and updates dom
       setTimeout(() => {
