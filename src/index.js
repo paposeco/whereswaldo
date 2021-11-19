@@ -474,7 +474,7 @@ const reCalculateLocationsOnResize = async function () {
     const docSnap = await getDoc(docRef);
     updateDomAfterRefresh(docSnap.data());
   } catch (error) {
-    console.log("Couldn't update doc in database ", error);
+    console.log("Couldn't update doc in database on resize", error);
   }
 };
 

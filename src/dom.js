@@ -272,6 +272,9 @@ const displayScoreboard = function (
   button.setAttribute("id", "closescoreboardbutton");
   button.innerHTML = "x";
   buttondiv.appendChild(button);
+  button.addEventListener("click", () => {
+    overlaydiv.remove();
+  });
   const annoucementdiv = document.createElement("div");
   const playerScore = document.createElement("p");
   playerScore.setAttribute("id", "playermessage");
@@ -325,7 +328,7 @@ const updateDomAfterRefresh = function (data) {
     { name: "odlawLocation", characterdata: data.odlawLocation },
     { name: "wendaLocation", characterdata: data.wendaLocation },
     { name: "wizardLocation", characterdata: data.wizardLocation },
-    { name: "woodLocation", characterdata: data.woofLocation },
+    { name: "woofLocation", characterdata: data.woofLocation },
   ];
   let foundcharacters = 0;
   for (let i = 0; i < allcharacters.length; i++) {
