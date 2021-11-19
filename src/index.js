@@ -191,10 +191,14 @@ const authStateObserver = async function (user) {
     highestScoresLink();
     if (!userHasPlayedBefore) {
       // if user hasn't played before, loads a clean game
-      initUser(user.uid);
+      setTimeout(() => {
+        initUser(user.uid);
+      });
     } else {
       // if the user has played before, fetches information of found characters from db and updates dom
-      updateDomAfterRefresh(docSnap.data());
+      setTimeout(() => {
+        updateDomAfterRefresh(docSnap.data());
+      }, 1000);
     }
   } else {
     // displays landing page
