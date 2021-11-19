@@ -23,9 +23,11 @@ import {
   increment,
 } from "firebase/firestore";
 
+// determines the locations of each character according to the size of the image displayed
 const calculateLocations = function (character) {
   let img = document.getElementById("backgroundimage");
   switch (character) {
+    //each character has an area of acceptable locations, which is stored in the db
     case "waldo": {
       const waldoLocationMinWidth = Math.ceil(0.3963 * Number(img.clientWidth));
       const waldoLocationMaxWidth = Math.ceil(0.4123 * Number(img.clientWidth));
@@ -120,6 +122,7 @@ const calculateLocations = function (character) {
   }
 };
 
+// gets the character location area from db and checks if the clicked coordinate is inside that area
 const checkIfSelectedCharacterIsCorrect = async function (coord, eventtarget) {
   const clickedX = Number(coord[0]);
   const clickedY = Number(coord[1]);
@@ -136,6 +139,7 @@ const checkIfSelectedCharacterIsCorrect = async function (coord, eventtarget) {
     clickedY <= maxheight &&
     clickedY >= minheight
   ) {
+    // if inside the area, updates dom and db
     createPrettyAlert(true, eventtarget);
     updateFoundCharacters(eventtarget.dataset.character);
     updateStatusSideBar(eventtarget.dataset.character);
@@ -164,15 +168,16 @@ const initFirebaseAuth = function () {
 };
 
 const authStateObserver = async function (user) {
-  //if user already existed on db dont init and get found characters
-  //on the dom functions there is a provision for when the user plays twice, but that shouldn't exist.
+  // if user is logged in (has clicked the start button), starts the game
   if (user) {
+    // checks if the user as played before (refreshed the page)
     const docRef = doc(getFirestore(), "users", user.uid);
     const docSnap = await getDoc(docRef);
     let userHasPlayedBefore = false;
     if (docSnap.exists()) {
       userHasPlayedBefore = true;
     }
+    // hides landing page
     const loadingdiv = document.getElementById("loading");
     loadingdiv.style.display = "none";
     const gamestartdiv = document.getElementById("gamestart");
@@ -180,21 +185,19 @@ const authStateObserver = async function (user) {
     gamediv.classList.add("showgame");
     gamediv.style.display = "flex";
     gamestartdiv.style.display = "none";
-    displayImage();
+    // loads background image and thumbnails, and creates high scores button
+    const placeImageOnBackground = await displayImage();
     addImagesToGame();
     highestScoresLink();
-    //ugly but necessary. by the time inituser was called the image wasn't loaded yet tried to await it but it didn't work
     if (!userHasPlayedBefore) {
-      setTimeout(() => {
-        initUser(user.uid);
-      }, 1000);
+      // if user hasn't played before, loads a clean game
+      initUser(user.uid);
     } else {
-      //display found characters on page
-      setTimeout(() => {
-        updateDomAfterRefresh(docSnap.data());
-      }, 1000);
+      // if the user has played before, fetches information of found characters from db and updates dom
+      updateDomAfterRefresh(docSnap.data());
     }
   } else {
+    // displays landing page
     const loadingdiv = document.getElementById("loading");
     loadingdiv.style.display = "none";
     const gamestartdiv = document.getElementById("gamestart");
@@ -203,6 +206,7 @@ const authStateObserver = async function (user) {
   }
 };
 
+// saves information for current user to db; characters' locations and start time
 const initUser = async function (uid) {
   try {
     await setDoc(doc(getFirestore(), "users", uid), {
@@ -220,6 +224,7 @@ const initUser = async function (uid) {
   }
 };
 
+// fetches location of a specific character for current user
 const getLocationFromDB = async function (character) {
   const docRef = doc(getFirestore(), "users", getAuth().currentUser.uid);
   const docSnap = await getDoc(docRef);
@@ -231,14 +236,16 @@ const getLocationFromDB = async function (character) {
   }
 };
 
+// updates values on db when user finds a character; if after updating the db the number of found characters is the total number of characters, updates the endtime on db and calls the high scores function.
 const updateFoundCharacters = async function (character) {
   if (getAuth().currentUser === null) {
     return;
   }
   const currentuser = getAuth().currentUser.uid;
   const docRef = doc(getFirestore(), "users", currentuser);
-  //didn't manage to find how to update fields when the field name is a variable
+  //didn't manage to find how to update fields on db when the field name is a variable
   if (character === "waldoLocation") {
+    // changes the value of field characterLocation.found to true and increments the found characters +1
     try {
       await updateDoc(docRef, {
         foundcharacters: increment(1),
@@ -293,7 +300,6 @@ const updateFoundCharacters = async function (character) {
     } catch (error) {
       console.log("Couldn't save timestamp for end of round ", error);
     }
-    //updatescoreboard
     scoreboardDB(currentuser);
   }
 };
@@ -307,13 +313,16 @@ const getNumberOfCharactersFoundFromDB = async function (docRef) {
   }
 };
 
+// checks the current high scores board and updates if necessary
 const scoreboardDB = async function (userid) {
+  // there are 2 collections on db; scoreboard and users; this function fetches both
   const docRefScoreboard = doc(getFirestore(), "scoreboard", "scoredata");
   const docSnapScoreboard = await getDoc(docRefScoreboard);
-
   const docRefPlayer = doc(getFirestore(), "users", userid);
   const docSnapPlayer = await getDoc(docRefPlayer);
   let timeToFinish = 0;
+
+  // calculates player's score
   if (docSnapPlayer.exists()) {
     const playerdata = docSnapPlayer.data();
     const startTime = playerdata["startTime"];
@@ -323,11 +332,12 @@ const scoreboardDB = async function (userid) {
     console.log("player not found");
   }
 
+  // sends current players in scoreboard and current anonymous counter to be evaluated
   if (docSnapScoreboard.exists()) {
     const scoreboarddata = docSnapScoreboard.data();
     const currentPlayersInScoreboard = scoreboarddata["players"];
     const currentAnonymous = scoreboarddata["anonymousplayers"];
-    // sends current players in scoreboard and current anonymous counter to be evaluated
+    // evaluateScores returns an array with a boolean for whether or nor the player made it to the high scores board, the current players on the board (which might include the current user), and a boolean for whether the user provided a name
     const placementInScoreboard = await evaluateScores(
       currentPlayersInScoreboard,
       timeToFinish,
@@ -342,7 +352,6 @@ const scoreboardDB = async function (userid) {
         placementInScoreboard[1],
         timeToFinish
       );
-      console.log("didn't make it");
     } else {
       //player made it to the scoreboard but didn't provide a name
       if (placementInScoreboard[2] === true) {
@@ -373,6 +382,7 @@ const scoreboardDB = async function (userid) {
   }
 };
 
+// compares user time to finish with the scores currently on high scores board
 const evaluateScores = async function (
   currentPlayersArray,
   newplayerScore,
@@ -382,29 +392,33 @@ const evaluateScores = async function (
   // get scores
   let currentScores = [];
   let currentUserIds = [];
+  // deep copy of current player array
   let copyOriginalPlayerArray = copyArrayValues(currentPlayersArray);
   const copyofcopy = copyArrayValues(copyOriginalPlayerArray);
+
+  // extracts time and name for user on high scores board
   currentPlayersArray.forEach((obj) => {
     currentScores.push(obj.time);
     currentUserIds.push(obj.userindb);
   });
+
   // compares current scores with user score
   const madeItToScoreboard = currentScores.findIndex(
     (score) => Number(score) === 0 || Number(score) > Number(newplayerScore)
   );
 
   let anonymoususer = false;
+
+  // if user score is better than at least one score on db
   if (madeItToScoreboard !== -1) {
-    // user score is better than at least a score on db
     let userSelectedName = promptUserForName();
     if (userSelectedName === undefined || userSelectedName === "") {
       userSelectedName = "Anonymous" + Number(currentanonymous + 1);
       // anonymous user is now true so that later on the number of anonymous users gets incremented in db
       anonymoususer = true;
     }
-    // I don't trust the index. but let's pretend this won't be a problem
 
-    //0 and 1 mix; index on array and placement differ by 1
+    //0 and 1 mix; index on array (0-4) and placement differ (1-5) by 1
     const firstPlayerToChangeScore = madeItToScoreboard + 1;
     const totalNumberPlayerToChange = 6 - firstPlayerToChangeScore;
     for (let i = 0; i < totalNumberPlayerToChange; i++) {
@@ -420,7 +434,7 @@ const evaluateScores = async function (
           firstPlayerToChangeScore + (i - 1)
         ].userindb = userid;
       } else {
-        //copy what was on the old array at the previous index
+        //copy what was on the old array of winners at the previous index
         copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].name =
           copyofcopy[firstPlayerToChangeScore + (i - 1) - 1].name;
         copyOriginalPlayerArray[firstPlayerToChangeScore + (i - 1)].time =
@@ -435,6 +449,7 @@ const evaluateScores = async function (
   }
 };
 
+// if the user resizes the window, recalculates character's locations and updates db
 const reCalculateLocationsOnResize = async function () {
   if (getAuth().currentUser === null) {
     return;
@@ -449,6 +464,7 @@ const reCalculateLocationsOnResize = async function () {
       "wizardLocation.location": calculateLocations("wizard"),
       "woofLocation.location": calculateLocations("woof"),
     });
+    //removes existing dom styling for found characters and updates dom at the new locations
     const allcircles = document.querySelectorAll(".characterfoundcircle");
     allcircles.forEach((div) => div.remove());
     const docSnap = await getDoc(docRef);
@@ -458,6 +474,7 @@ const reCalculateLocationsOnResize = async function () {
   }
 };
 
+// loads high scores board by first fetching the current players on board from db
 const highestScoresLink = function () {
   const highestscorespara = document.getElementById("highestscoreslink");
   highestscorespara.addEventListener("click", async function () {
@@ -476,6 +493,7 @@ const highestScoresLink = function () {
   });
 };
 
+// deep copy function of array of objects
 const copyArrayValues = function (arrayOfObjects) {
   let resultingarray = [];
   for (let i = 0; i < arrayOfObjects.length; i++) {

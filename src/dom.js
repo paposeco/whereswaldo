@@ -7,6 +7,7 @@ import woofThumbnail from "./images/woofthumbnail.jpg";
 import BackgroundImage from "./images/waldo.jpeg";
 import { getAuth } from "firebase/auth";
 
+// loads characters' images to start page
 const addImagesToStartPage = function () {
   if (getAuth().currentUser !== null) {
     return;
@@ -28,23 +29,29 @@ const addImagesToStartPage = function () {
   }
 };
 
+// loads background image and sets critical style; if styled with css, the character's locations would be incorrect on db
 const displayImage = function () {
   const background = document.getElementById("background");
+  background.style.width = "100%";
   const img = document.createElement("img");
   img.src = BackgroundImage;
   img.alt = "backgroundimage";
   img.setAttribute("id", "backgroundimage");
+  img.style.display = "block";
+  img.style.maxHeight = "100%";
+  img.style.maxWidth = "100%";
+  img.style.margin = "0 auto";
   background.appendChild(img);
+  // clicking on image pops up a list of all characters
   img.addEventListener("click", (event) => {
     createDropDown(event);
   });
+  return "done";
 };
 
+// loads characters' images to game and creates high scores button
 const addImagesToGame = function () {
   const sidethumbnailsdiv = document.getElementById("sidethumbnails");
-  // const sidetitle = document.createElement("h3");
-  // sidetitle.textContent = "Characters";
-  // sidethumbnailsdiv.appendChild(sidetitle);
   const allCharacters = [
     { alias: "waldothumbnail", file: waldoThumbnail, name: "Waldo" },
     { alias: "odlawthumbnail", file: odlawThumbnail, name: "Odlaw" },
@@ -61,12 +68,9 @@ const addImagesToGame = function () {
     div.setAttribute("class", "divcharacterthumbnail");
     div.setAttribute("id", allCharacters[i].alias);
     const img = document.createElement("img");
-    // const charactername = document.createElement("h4");
-    // charactername.textContent = allCharacters[i].name;
     img.src = allCharacters[i].file;
     img.alt = allCharacters[i].alias;
     img.setAttribute("class", "characterthumbnailgame");
-    // div.appendChild(charactername);
     div.appendChild(img);
     sidethumbnailsdiv.appendChild(div);
   }
@@ -76,12 +80,14 @@ const addImagesToGame = function () {
   sidethumbnailsdiv.appendChild(highscorebutton);
 };
 
+// creates a list of all characters when user clicks the background image; each element on the list has an event listener for selecting the character
 const createDropDown = function (event) {
   const img = document.getElementById("backgroundimage");
   const backgrounddiv = document.getElementById("background");
   const imgwidth = Number(img.clientWidth);
   const backgrounddivwidth = Number(backgrounddiv.clientWidth);
   let leftmargin = 0;
+  // the list is placed at the right of the click location
   if (backgrounddivwidth > imgwidth) {
     leftmargin = (backgrounddivwidth - imgwidth) / 2;
   }
@@ -104,7 +110,6 @@ const createDropDown = function (event) {
   const liwaldo = document.createElement("li");
   liwaldo.textContent = "Waldo";
   liwaldo.setAttribute("data-character", "waldoLocation");
-
   const liodlaw = document.createElement("li");
   liodlaw.textContent = "Odlaw";
   liodlaw.setAttribute("data-character", "odlawLocation");
@@ -127,6 +132,7 @@ const createDropDown = function (event) {
   const characters = [liwaldo, liodlaw, liwenda, liwhitebeard, liwoof];
   for (let i = 0; i < characters.length; i++) {
     characters[i].addEventListener("click", (anotherevent) => {
+      // checks if the user selected the correct character from the list
       checkIfSelectedCharacterIsCorrect(clickLocation, anotherevent.target);
       div.remove();
     });
@@ -140,7 +146,7 @@ const createDropDown = function (event) {
   div.appendChild(ul);
 };
 
-//on resize doesn't draw on the correct place
+// draws a black circle around the clicked spot if a character was found
 const drawCircleAroundCharacter = function (coordx, coordy, character) {
   const img = document.getElementById("backgroundimage");
   const backgroundiv = document.getElementById("background");
@@ -164,6 +170,7 @@ const drawCircleAroundCharacter = function (coordx, coordy, character) {
   backgroundiv.appendChild(div);
 };
 
+// styles the characters images differently when a character is found
 const updateStatusSideBar = function (datasetcharacter) {
   const allCharacters = [
     { setname: "waldoLocation", aliasondiv: "waldothumbnail" },
@@ -187,6 +194,7 @@ const updateStatusSideBar = function (datasetcharacter) {
   characterdivondom.appendChild(div);
 };
 
+// creates an overlay to notify the user if a character was found or not
 const createPrettyAlert = function (characterfound, eventtarget) {
   const overlaydiv = document.createElement("div");
   const gamediv = document.getElementById("game");
@@ -228,6 +236,7 @@ const createPrettyAlert = function (characterfound, eventtarget) {
   }, 2500);
 };
 
+// prompts the user to provide a name if the user has a winning score; the username is restricted to 12 characters
 const promptUserForName = function () {
   let username = window.prompt(
     "Congratulations, you made it to the scoreboard! What should we call you? (max 12 characters)"
@@ -238,6 +247,7 @@ const promptUserForName = function () {
   return username;
 };
 
+// creates a table with the current high scores
 const displayScoreboard = function (
   playerHasHighScore,
   scoreboardarray,
@@ -307,6 +317,7 @@ const displayScoreboard = function (
   gamediv.appendChild(overlaydiv);
 };
 
+// if the user refreshed the page ou closed the tab, restyles page to match characters found
 const updateDomAfterRefresh = function (data) {
   const numberoffoundcharacters = data.foundcharacters;
   const allcharacters = [
