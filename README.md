@@ -1,5 +1,7 @@
 # Where's Waldo game for The Odin Project
 
+[Live Demo](https://paposeco.github.io/whereswaldo/)
+
 The purpose of this project was to learn to interact with a backend by making a photo tagging app. I implemented a Where's Waldo game where you have to identify 5 characters and used a Firebase database.
 
 ## Features
